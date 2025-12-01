@@ -5,8 +5,12 @@ export async function updateData(req, res) {
     const { id, name, email, score } = req.body;
     if (!id) {
     return res.status(400).json({ error: "id required" });
-      
   }
+    const updates = {};
+    if (name) updates.name = name;
+    if (email) updates.email = email;
+    if (score) updates.score = score;
+    
 } catch (err){
         return res.status(500).json({error: "Server error", details: err});
 }}
