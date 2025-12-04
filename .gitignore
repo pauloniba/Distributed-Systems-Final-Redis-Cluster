@@ -1,6 +1,30 @@
+# Ignore Redis runtime data folders
+redis1-data/
+redis2-data/
+redis3-data/
 data1/
 data2/
 data3/
-appendonly*.aof*
-dump.rdb
-nodes*.conf
+appendonlydir/
+
+# Ignore Redis dump files
+*.rdb
+*.aof
+
+# Ignore Node modules
+redis-crud/node_modules/
+
+# Ignore random temp folders/files
+nano
+*.tmp
+
+# Ignore container IDs accidentally created
+00926cf1eccd
+263912362a1a
+38af287a774b
+7b73a0d559b3
+a31dfe289a4f
+
+# Ignore log files
+*.log
+

@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Distributed Leaderboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f6fa;
+            margin: 40px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #2d3436;
+        }
+
+        .container {
+            width: 600px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+
+        input, button {
+            padding: 10px;
+            font-size: 16px;
+            margin: 5px 0;
+        }
+
+        button {
+            width: 100%;
+            background: #0984e3;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #74b9ff;
+        }
+
+        .leaderboard {
+            margin-top: 20px;
+        }
+
+        table {
+            width: 100%;
+            margin-top: 10px;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #dfe6e9;
+        }
+
+        th {
+            background: #dfe6e9;
+        }
+
+        .refresh-btn {
+            background: #00b894;
+        }
+
+        .refresh-btn:hover {
+            background: #55efc4;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Distributed Redis Leaderboard</h1>
+
+    <div class="container">
+
+        <!-- Add Player Section -->
+        <h3>Add Player</h3>
+        <input id="playerName" placeholder="Player Name">
+        <input id="playerScore" type="number" placeholder="Initial Score">
+        <button onclick="addPlayer()">Add Player</button>
+
+        <!-- Increase Score Section -->
+        <h3>Increase Player Score</h3>
+        <input id="incName" placeholder="Player Name">
+        <input id="incAmount" type="number" placeholder="Increase Amount (+)">
+        <button onclick="increaseScore()">Increase Score</button>
+
+        <!-- Leaderboard Table -->
+        <div class="leaderboard">
+            <h3>Top Players</h3>
+            <button class="refresh-btn" onclick="loadLeaderboard()">Refresh Leaderboard</button>
+
+            <table id="leaderboardTable">
+                <tr>
+                    <th>Rank</th>
+                    <th>Player</th>
+                    <th>Score</th>
+                </tr>
+            </table>
+        </div>
+
+    </div>
+
+    <script>
+        const API = "http://localhost:3000";
+
+        async function addPlayer() {
+            const player = document.getElementById("playerName").value;
+            const score = document.getElementById("playerScore").value;
+
+            if (!player || !score) return alert("Enter player name and score.");
+
+            await fetch(`${API}/leaderboard/score`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ player, score: Number(score) })
+            });
+
+            alert("Player added!");
+            loadLeaderboard();
+        }
+
+        async function increaseScore() {
+            const player = document.getElementById("incName").value;
+            const amount = document.getElementById("incAmount").value;
+
+            if (!player || !amount) return alert("Enter player and amount.");
+
+            await fetch(`${API}/leaderboard/incr`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ player, amount: Number(amount) })
+            });
+
+            alert("Score increased!");
+            loadLeaderboard();
+        }
+
+        async function loadLeaderboard() {
+            const res = await fetch(`${API}/leaderboard/top/10`);
+            const data = await res.json();
+
+            const table = document.getElementById("leaderboardTable");
+            table.innerHTML = `
+                <tr>
+                    <th>Rank</th>
+                    <th>Player</th>
+                    <th>Score</th>
+                </tr>
+            `;
+
+            data.top.forEach((entry, index) => {
+                table.innerHTML += `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${entry.player}</td>
+                        <td>${entry.score}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        window.onload = loadLeaderboard;
+    </script>
+
+</body>
+</html>

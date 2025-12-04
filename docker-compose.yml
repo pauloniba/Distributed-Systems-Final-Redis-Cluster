@@ -1,0 +1,50 @@
+version: "3.9"
+
+services:
+  redis1:
+    image: redis:7.2
+    container_name: redis1
+    command: ["redis-server", "/etc/redis/redis.conf"]
+    volumes:
+      - ./data1:/data
+      - ./redis1.conf:/etc/redis/redis.conf
+    networks:
+      - redis-net
+
+  redis2:
+    image: redis:7.2
+    container_name: redis2
+    command: ["redis-server", "/etc/redis/redis.conf"]
+    volumes:
+      - ./data2:/data
+      - ./redis2.conf:/etc/redis/redis.conf
+    networks:
+      - redis-net
+
+  redis3:
+    image: redis:7.2
+    container_name: redis3
+    command: ["redis-server", "/etc/redis/redis.conf"]
+    volumes:
+      - ./data3:/data
+      - ./redis3.conf:/etc/redis/redis.conf
+    networks:
+      - redis-net
+
+  redis-api:
+    container_name: redis-api
+    build:
+      context: ./redis-crud
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    depends_on:
+      - redis1
+      - redis2
+      - redis3
+    networks:
+      - redis-net
+
+networks:
+  redis-net:
+    driver: bridge
